@@ -41,9 +41,9 @@ type LoggerConfig struct {
 type PostgresConfig struct {
 	Host           string `env:"POSTGRES_HOST"       env-default:"localhost"`
 	Port           string `env:"POSTGRES_PORT"       env-default:"5432"`
-	Username       string `env:"POSTGRES_USER"       env-default:"postgres"`
-	Password       string `env:"POSTGRES_PASSWORD"   env-default:"postgres"`
-	Database       string `env:"POSTGRES_DB"         env-default:"postgres"`
+	Username       string `env:"POSTGRES_USER"       env-default:"timur"`
+	Password       string `env:"POSTGRES_PASSWORD"   env-default:"Mars237s!"`
+	Database       string `env:"POSTGRES_DB"         env-default:"tbank"`
 	SSLMode        string `env:"POSTGRES_SSL_MODE"   env-default:"disable"`
 	MigrationsPath string `env:"GOOSE_MIGRATION_DIR" env-default:"./migrations"`
 

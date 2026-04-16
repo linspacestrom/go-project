@@ -3,9 +3,12 @@ package postgres
 import (
 	"context"
 
+	"github.com/Masterminds/squirrel"
 	trmpgx "github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
+
+var psql = squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
 
 type Repository struct {
 	db     *pgxpool.Pool
@@ -22,4 +25,8 @@ func (r *Repository) Close() {
 
 func (r *Repository) GetConn(ctx context.Context) trmpgx.Tr {
 	return r.getter.DefaultTrOrDB(ctx, r.db)
+}
+
+func (r *Repository) Ping(ctx context.Context) error {
+	return r.db.Ping(ctx)
 }

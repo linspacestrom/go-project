@@ -27,9 +27,28 @@ type Server struct {
 func New(
 	log *zap.Logger,
 	cfg config.HTTPConfig,
-	handlers ...Handler,
+	authSecret string,
+	publicHandlers []Handler,
+	protectedHandlers []Handler,
 ) *Server {
-	router := registerRoutes(log, cfg, handlers...)
+	if cfg.Mode != "" {
+		gin.SetMode(cfg.Mode)
+	}
+
+	r := gin.New()
+	r.Use(gin.Recovery())
+	r.Use(middleware.RequestLogger(log))
+	publicGroup := r.Group("/")
+
+	for _, h := range publicHandlers {
+		h.RegisterRoutes(publicGroup)
+	}
+
+	protectedGroup := r.Group("/")
+	protectedGroup.Use(middleware.JWTAuthMiddleware(authSecret))
+	for _, h := range protectedHandlers {
+		h.RegisterRoutes(protectedGroup)
+	}
 
 	return &Server{
 		server: &http.Server{
@@ -37,31 +56,11 @@ func New(
 			ReadTimeout:  cfg.Timeout.Read,
 			WriteTimeout: cfg.Timeout.Write,
 			IdleTimeout:  cfg.Timeout.Idle,
-			Handler:      router,
+			Handler:      r,
 		},
-		router: router,
-		cfg:    cfg,
-		log:    log,
+		cfg: cfg,
+		log: log,
 	}
-}
-
-func registerRoutes(log *zap.Logger, cfg config.HTTPConfig, handlers ...Handler) *gin.Engine {
-	if cfg.Mode != "" {
-		gin.SetMode(cfg.Mode)
-	} else {
-		gin.SetMode(gin.DebugMode)
-	}
-
-	r := gin.New()
-
-	r.Use(gin.Recovery())
-	r.Use(middleware.RequestLogger(log))
-
-	for _, handler := range handlers {
-		handler.RegisterRoutes(r)
-	}
-
-	return r
 }
 
 func (s *Server) MustRun() {
