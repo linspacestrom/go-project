@@ -97,6 +97,38 @@ func JWTAuthMiddleware(authSecret string) gin.HandlerFunc {
 	}
 }
 
+func RequireRoles(roles ...string) gin.HandlerFunc {
+	allowed := make(map[string]struct{}, len(roles))
+	for _, role := range roles {
+		allowed[role] = struct{}{}
+	}
+
+	return func(c *gin.Context) {
+		role, ok := GetRole(c)
+		if !ok {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "forbidden"})
+
+			return
+		}
+		if _, exists := allowed[role]; !exists {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "forbidden"})
+
+			return
+		}
+		c.Next()
+	}
+}
+
+func GetRole(c *gin.Context) (string, bool) {
+	role, ok := c.Get(roleContextKey)
+	if !ok {
+		return "", false
+	}
+	roleStr, ok := role.(string)
+
+	return roleStr, ok
+}
+
 func GetUserID(c *gin.Context) (uuid.UUID, error) {
 	id, exists := c.Get(userIDContextKey)
 	if !exists {

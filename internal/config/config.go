@@ -15,11 +15,24 @@ type Config struct {
 	Logger   LoggerConfig   `yaml:"logger"`
 	Postgres PostgresConfig `yaml:"postgres"`
 	Auth     AuthConfig     `yaml:"auth"`
+	Kafka    KafkaConfig    `yaml:"kafka"`
+	Outbox   OutboxConfig   `yaml:"outbox"`
 }
 
 type AuthConfig struct {
-	Secret   string        `env:"JWT_SECRET" env-default:"my-super-secret-key"`
-	TokenTTL time.Duration `env:"JWT_TTL"    env-default:"24h"`
+	Secret          string        `env:"JWT_SECRET" env-default:"my-super-secret-key"`
+	TokenTTL        time.Duration `env:"JWT_TTL" env-default:"24h"`
+	RefreshTokenTTL time.Duration `env:"JWT_REFRESH_TTL" env-default:"720h"`
+}
+
+type KafkaConfig struct {
+	Brokers []string `env:"KAFKA_BROKERS" env-separator:"," env-default:"localhost:9092"`
+	Topic   string   `env:"KAFKA_TOPIC" env-default:"notification-events"`
+}
+
+type OutboxConfig struct {
+	DispatchInterval time.Duration `env:"OUTBOX_DISPATCH_INTERVAL" env-default:"2s"`
+	BatchSize        uint64        `env:"OUTBOX_BATCH_SIZE" env-default:"100"`
 }
 
 type HTTPConfig struct {

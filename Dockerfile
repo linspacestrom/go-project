@@ -17,8 +17,8 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 
-RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o ${BINARY_NAME} ./cmd/app/app.go
-RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o ${MIGRATOR_BINARY_NAME} ./cmd/migrator/migrator.go
+RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o ${BINARY_NAME} ./cmd/app
+RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o ${MIGRATOR_BINARY_NAME} ./cmd/migrator
 
 FROM alpine:${ALPINE_VERSION} AS app
 
@@ -30,6 +30,7 @@ WORKDIR ${WORKDIR_PATH}
 COPY --from=builder /build/${BINARY_NAME} .
 RUN mkdir -p ${WORKDIR_PATH}/${CONFIG_DIR}
 COPY --from=builder /build/${CONFIG_DIR}/ ./${CONFIG_DIR}/
+COPY --from=builder /build/migrations/ ./migrations/
 
 EXPOSE 8080
 

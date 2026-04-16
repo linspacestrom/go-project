@@ -1,7 +1,8 @@
 package domain
 
 const (
-	RoleAdmin  = "admin"
-	RoleUser   = "user"
-	RoleMentor = "mentor"
+	RoleAdmin   = "admin"
+	RoleStudent = "student"
+	RoleUser    = RoleStudent
+	RoleMentor  = "mentor"
 )

@@ -1,0 +1,262 @@
+openapi: 3.0.3
+info:
+  title: Student & T Main Service API
+  version: 1.0.0
+  description: API for students, mentors and admins in Student & T platform.
+servers:
+  - url: http://localhost:8080
+paths:
+  /heathz:
+    get:
+      tags: [system]
+      summary: Health probe
+      responses:
+        '200':
+          description: OK
+  /readyz:
+    get:
+      tags: [system]
+      summary: Readiness probe
+      responses:
+        '200':
+          description: OK
+  /api/v1/auth/register:
+    post:
+      tags: [auth]
+      summary: Register user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Invalid request
+  /api/v1/auth/login:
+    post:
+      tags: [auth]
+      summary: Login by email/password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Token pair
+  /api/v1/auth/refresh:
+    post:
+      tags: [auth]
+      summary: Refresh tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: Token pair
+  /api/v1/auth/logout:
+    post:
+      tags: [auth]
+      summary: Logout (revoke refresh)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+      responses:
+        '204':
+          description: No Content
+  /api/v1/me:
+    get:
+      tags: [user]
+      summary: Get current user profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+    patch:
+      tags: [user]
+      summary: Update current user profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Updated
+  /api/v1/cities:
+    get:
+      tags: [catalog]
+      summary: List cities
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/v1/cities/{cityId}/hubs:
+    get:
+      tags: [catalog]
+      summary: List hubs by city
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: cityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+  /api/v1/cities/{cityId}/rooms:
+    get:
+      tags: [catalog]
+      summary: List rooms by city
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: cityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+  /api/v1/slots:
+    get:
+      tags: [slots]
+      summary: List slots
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/v1/bookings:
+    post:
+      tags: [bookings]
+      summary: Create booking
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Created
+    get:
+      tags: [bookings]
+      summary: List my bookings
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/v1/bookings/{id}:
+    delete:
+      tags: [bookings]
+      summary: Cancel booking
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Canceled
+  /api/v1/mentor-requests:
+    post:
+      tags: [mentor-requests]
+      summary: Create mentor request
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Created
+    get:
+      tags: [mentor-requests]
+      summary: List mentor requests
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/v1/admin/cities:
+    post:
+      tags: [admin]
+      summary: Create city
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Created
+  /api/v1/admin/hubs:
+    post:
+      tags: [admin]
+      summary: Create hub
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Created
+  /api/v1/admin/rooms:
+    post:
+      tags: [admin]
+      summary: Create room
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Created
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [email, password, full_name]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        full_name:
+          type: string
+        role:
+          type: string
+          enum: [student, mentor, admin]
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+    RefreshRequest:
+      type: object
+      required: [refresh_token]
+      properties:
+        refresh_token:
+          type: string
+    LogoutRequest:
+      type: object
+      required: [refresh_token]
+      properties:
+        refresh_token:
+          type: string
