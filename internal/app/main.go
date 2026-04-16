@@ -1,16 +1,22 @@
 package app
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/linspacestrom/go-project/internal/auth"
 	"github.com/linspacestrom/go-project/internal/config"
 	"github.com/linspacestrom/go-project/internal/repository"
 	"github.com/linspacestrom/go-project/internal/server"
+	authService "github.com/linspacestrom/go-project/internal/service/auth"
+	authHandler "github.com/linspacestrom/go-project/internal/transport/http/handlers/auth"
+	infoHandler "github.com/linspacestrom/go-project/internal/transport/http/handlers/info"
 	"go.uber.org/zap"
 )
 
 type Repository interface {
 	Close()
+	Ping(ctx context.Context) error
 }
 
 type App struct {
@@ -27,7 +33,22 @@ func New(log *zap.Logger, cfg *config.Config) (*App, error) {
 	}
 
 	_ = trManager
-	api := server.New(log, cfg.Server)
+
+	tokenManager := auth.NewManager(cfg.Auth.Secret, cfg.Auth.TokenTTL)
+
+	authSvc := authService.NewService(tokenManager, repo)
+	authHndl := authHandler.NewHandler(authSvc)
+
+	infoHndl := infoHandler.NewHandler(repo)
+
+	publicHandlers := []server.Handler{
+		infoHndl,
+		authHndl,
+	}
+
+	protectedHandlers := []server.Handler{}
+
+	api := server.New(log, cfg.Server, cfg.Auth.Secret, publicHandlers, protectedHandlers)
 
 	return &App{
 		log:  log,
