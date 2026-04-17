@@ -36,9 +36,10 @@ type OutboxConfig struct {
 }
 
 type HTTPConfig struct {
-	Host    string `env:"HTTP_HOST" env-default:"0.0.0.0" yaml:"host"`
-	Port    string `env:"HTTP_PORT" env-default:"8080"    yaml:"port"`
-	Mode    string `env:"GIN_MODE"  env-default:"release"`
+	Host               string   `env:"HTTP_HOST" env-default:"0.0.0.0" yaml:"host"`
+	Port               string   `env:"HTTP_PORT" env-default:"8080"    yaml:"port"`
+	Mode               string   `env:"GIN_MODE"  env-default:"release"`
+	CORSAllowedOrigins []string `env:"CORS_ALLOWED_ORIGINS" env-separator:"," env-default:"http://localhost:5173,http://127.0.0.1:5173" yaml:"cors_allowed_origins"`
 	Timeout struct {
 		Server time.Duration `yaml:"server"`
 		Write  time.Duration `yaml:"write"`

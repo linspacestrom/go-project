@@ -38,6 +38,7 @@ func New(
 	r := gin.New()
 	r.Use(gin.Recovery())
 	r.Use(middleware.RequestLogger(log))
+	r.Use(middleware.CORS(cfg.CORSAllowedOrigins))
 	publicGroup := r.Group("/")
 
 	for _, h := range publicHandlers {
